@@ -8,6 +8,7 @@ from modules.ai_engine import ai_engine
 import os
 import socket
 from datetime import datetime, timedelta
+from sqlalchemy import text
 
 
 def get_available_port(start_port=5003, end_port=5100):
@@ -30,6 +31,23 @@ app.config['SQLALCHEMY_DATABASE_URI'] = database_url or 'sqlite:///learning_plat
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db.init_app(app)
+
+
+def ensure_database_schema():
+    with app.app_context():
+        db.create_all()
+
+        try:
+            if db.engine.dialect.name == 'postgresql':
+                db.session.execute(text('ALTER TABLE "user" ALTER COLUMN username TYPE VARCHAR(255)'))
+                db.session.execute(text('ALTER TABLE "user" ALTER COLUMN email TYPE VARCHAR(255)'))
+                db.session.execute(text('ALTER TABLE "user" ALTER COLUMN password TYPE VARCHAR(255)'))
+                db.session.commit()
+        except Exception as exc:
+            db.session.rollback()
+            print(f"Schema migration note: {exc}")
+
+
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
@@ -601,7 +619,7 @@ from db_setup import ChatMessage
 socketio = SocketIO(app, cors_allowed_origins="*", logger=True, engineio_logger=True)
 
 with app.app_context():
-    db.create_all()
+    ensure_database_schema()
 
 # Socket.IO Events
 @socketio.on('connect')
@@ -658,7 +676,7 @@ if __name__ == '__main__':
     port = int(preferred_port) if preferred_port else get_available_port()
 
     with app.app_context():
-        db.create_all()
+        ensure_database_schema()
 
     print(f"Starting SocketIO server on {host}:{port}...")
     print(f"Open this in your browser: http://{host}:{port}/")
