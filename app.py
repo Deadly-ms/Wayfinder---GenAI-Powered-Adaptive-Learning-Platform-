@@ -21,8 +21,12 @@ def get_available_port(start_port=5003, end_port=5100):
     raise RuntimeError(f'No free port found in range {start_port}-{end_port}')
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'your_secret_key_here'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///learning_platform.db'
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-secret-change-me')
+
+database_url = os.getenv('DATABASE_URL')
+if database_url:
+    database_url = database_url.replace('postgres://', 'postgresql://', 1)
+app.config['SQLALCHEMY_DATABASE_URI'] = database_url or 'sqlite:///learning_platform.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db.init_app(app)
@@ -596,7 +600,8 @@ from db_setup import ChatMessage
 
 socketio = SocketIO(app, cors_allowed_origins="*", logger=True, engineio_logger=True)
 
-
+with app.app_context():
+    db.create_all()
 
 # Socket.IO Events
 @socketio.on('connect')

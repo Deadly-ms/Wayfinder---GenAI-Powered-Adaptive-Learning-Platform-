@@ -1,4 +1,5 @@
 flask
+gunicorn
 flask_sqlalchemy
 flask_login
 python-dotenv
@@ -12,3 +13,4 @@ python-docx
 flask-socketio
 eventlet
 pdfminer.six
+psycopg2-binary
