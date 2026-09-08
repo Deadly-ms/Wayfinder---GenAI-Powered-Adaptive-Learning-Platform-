@@ -1,0 +1,204 @@
+{% extends "base.html" %}
+
+{% block title %}AI Tutor{% endblock %}
+
+{% block content %}
+<div
+    class="flex flex-col h-[calc(100vh-6rem)] lg:h-[calc(100vh-8rem)] bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+    <!-- Chat Header -->
+    <div class="px-8 py-5 flex items-center justify-between shrink-0 bg-white border-b border-slate-100">
+        <div>
+            <h2 class="text-xl font-bold text-slate-900">AI Tutor</h2>
+            <p class="text-sm text-slate-500">Always online to help you</p>
+        </div>
+        <div class="flex items-center space-x-3">
+            <span
+                class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                <span class="w-2 h-2 mr-1.5 bg-emerald-500 rounded-full animate-pulse"></span>
+                Online
+            </span>
+            <button class="text-slate-400 hover:text-slate-600 transition-colors">
+                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- Chat Messages -->
+    <div id="chat-box" class="flex-1 overflow-y-auto p-8 space-y-6 bg-slate-50 scorll-smooth">
+        <!-- Initial Message -->
+        <div class="flex items-start">
+            <div class="flex-shrink-0">
+                <div
+                    class="h-10 w-10 rounded-full bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center text-white text-sm font-bold shadow-md">
+                    AI</div>
+            </div>
+            <div
+                class="ml-4 bg-white p-5 rounded-2xl rounded-tl-none shadow-sm text-slate-800 text-base leading-relaxed max-w-[75%] border border-slate-200">
+                <p>Hello! I'm your personal AI Learning Assistant. 🎓</p>
+                <p class="mt-2">I can help you understand complex topics, generate study plans, or just answer quick
+                    questions. What are we learning today?</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Input Area -->
+    <div class="bg-white border-t border-slate-200 p-6 shrink-0">
+        <div class="flex space-x-4 items-end">
+            <div class="relative flex-1">
+                <textarea id="user-input" rows="1"
+                    class="block w-full rounded-xl border-slate-300 pl-4 pr-12 py-4 focus:border-brand-500 focus:ring-brand-500 sm:text-base bg-slate-50 focus:bg-white transition-all resize-none shadow-sm"
+                    placeholder="Ask anything..." onkeypress="handleEnter(event)"
+                    oninput="this.style.height = ''; this.style.height = this.scrollHeight + 'px'"></textarea>
+                <div class="absolute bottom-3 right-3 flex space-x-2">
+                    <button class="p-1 text-slate-400 hover:text-brand-500 transition-colors">
+                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <button onclick="sendMessage()"
+                class="inline-flex items-center justify-center h-14 w-14 rounded-xl shadow-lg text-white bg-brand-600 hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 transition-all transform hover:-translate-y-1">
+                <svg class="h-6 w-6 rotate-90 translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                </svg>
+            </button>
+        </div>
+        <p class="mt-3 text-center text-xs text-slate-400">AI can make mistakes. Consider checking important
+            information.</p>
+    </div>
+</div>
+
+<script>
+    const box = document.getElementById('chat-box');
+    const input = document.getElementById('user-input');
+
+    // 1. Connection & History Loading (Still using socket for initial load if needed, or we can fetch)
+    // For now we assume history is loaded via template or separate fetch, 
+    // but the user wants "fresh logic", so let's stick to simple efficient message sending.
+    // We'll keep the socket just for "status" if we wanted, or remove if unused. 
+    // The previous code used socket for history, let's leave it minimal or remove if it causes lag.
+    // Actually, to be "fast" and "fresh", let's remove socket dependency for messaging entirely.
+
+    // Auto-scroll on load
+    scrollToBottom();
+
+    // 2. Sending Messages
+    function handleEnter(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } }
+
+    async function sendMessage() {
+        const msg = input.value.trim();
+        if (!msg) return;
+
+        // UI Optimistic Update
+        appendUserMessage(msg);
+        input.value = '';
+        input.style.height = 'auto';
+        scrollToBottom();
+
+        // Show Loading Indicator
+        const loadId = showLoading();
+        scrollToBottom();
+
+        try {
+            // Send via HTTP POST
+            const response = await fetch('/chat/message', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ question: msg })
+            });
+
+            const data = await response.json();
+
+            // Remove loader
+            removeLoading(loadId);
+
+            if (data.error) {
+                appendAIMessage("Error: " + data.error);
+            } else {
+                appendAIMessage(data.answer);
+            }
+
+        } catch (err) {
+            removeLoading(loadId);
+            appendAIMessage("Network Error: Could not reach the AI Tutor.");
+            console.error(err);
+        }
+
+        scrollToBottom();
+    }
+
+    // Helper Functions
+    function appendUserMessage(text) {
+        box.innerHTML += `
+            <div class="flex items-start justify-end">
+                <div class="mr-4 bg-brand-600 p-5 rounded-2xl rounded-tr-none shadow-md text-white text-base leading-relaxed max-w-[85%]">
+                    ${escapeHtml(text)}
+                </div>
+                 <div class="flex-shrink-0">
+                    <div class="h-10 w-10 rounded-full bg-slate-200 flex items-center justify-center text-slate-600 text-sm font-bold shadow-sm">You</div>
+                </div>
+            </div>
+        `;
+    }
+
+    function appendAIMessage(text) {
+        // Basic Markdown-ish parsing
+        let formatted = text
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // Bold
+            .replace(/```([\s\S]*?)```/g, '<pre class="bg-slate-800 text-slate-100 p-4 rounded-lg my-2 overflow-x-auto text-sm"><code>$1</code></pre>') // Code blocks
+            .replace(/`([^`]+)`/g, '<code class="bg-slate-100 text-brand-600 px-1 py-0.5 rounded text-sm font-mono">$1</code>') // Inline code
+            .replace(/\n/g, '<br>');
+
+        box.innerHTML += `
+            <div class="flex items-start">
+                <div class="flex-shrink-0">
+                    <div class="h-10 w-10 rounded-full bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center text-white text-sm font-bold shadow-md">AI</div>
+                </div>
+                <div class="ml-4 bg-white p-5 rounded-2xl rounded-tl-none shadow-sm text-slate-800 text-base leading-relaxed max-w-[85%] border border-slate-200">
+                    ${formatted}
+                </div>
+            </div>
+        `;
+    }
+
+    function showLoading() {
+        const id = 'l-' + Date.now();
+        box.innerHTML += `
+            <div id="${id}" class="flex items-start">
+               <div class="flex-shrink-0">
+                   <div class="h-10 w-10 rounded-full bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center text-white text-sm font-bold shadow-md">AI</div>
+               </div>
+               <div class="ml-4 bg-white p-5 rounded-2xl rounded-tl-none shadow-sm text-slate-400 text-base italic border border-slate-200">
+                   <div class="flex space-x-1">
+                        <div class="w-2 h-2 bg-slate-400 rounded-full animate-bounce"></div>
+                        <div class="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+                        <div class="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                   </div>
+               </div>
+           </div>
+        `;
+        return id;
+    }
+
+    function removeLoading(id) {
+        const loader = document.getElementById(id);
+        if (loader) loader.remove();
+    }
+
+    function scrollToBottom() {
+        box.scrollTop = box.scrollHeight;
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+</script>
+{% endblock %}

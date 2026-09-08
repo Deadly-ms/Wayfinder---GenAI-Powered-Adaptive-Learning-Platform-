@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block title %}Sign Up{% endblock %}
+
+{% block content %}
+<div class="min-h-full flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div class="sm:mx-auto sm:w-full sm:max-w-md">
+        <h2 class="mt-6 text-center text-3xl font-extrabold text-slate-900">Create your account</h2>
+        <p class="mt-2 text-center text-sm text-slate-600">
+            Or
+            <a href="{{ url_for('login') }}" class="font-medium text-brand-600 hover:text-brand-500">sign in if you
+                already have one</a>
+        </p>
+    </div>
+
+    <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+        <div class="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+            <form class="space-y-6" action="{{ url_for('signup') }}" method="POST">
+                <div>
+                    <label for="username" class="block text-sm font-medium text-slate-700">Username</label>
+                    <div class="mt-1">
+                        <input id="username" name="username" type="text" required
+                            class="appearance-none block w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm placeholder-slate-400 focus:outline-none focus:ring-brand-500 focus:border-brand-500 sm:text-sm">
+                    </div>
+                </div>
+
+                <div>
+                    <label for="email" class="block text-sm font-medium text-slate-700">Email address</label>
+                    <div class="mt-1">
+                        <input id="email" name="email" type="email" autocomplete="email" required
+                            class="appearance-none block w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm placeholder-slate-400 focus:outline-none focus:ring-brand-500 focus:border-brand-500 sm:text-sm">
+                    </div>
+                </div>
+
+                <div>
+                    <label for="password" class="block text-sm font-medium text-slate-700">Password</label>
+                    <div class="mt-1">
+                        <input id="password" name="password" type="password" required
+                            class="appearance-none block w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm placeholder-slate-400 focus:outline-none focus:ring-brand-500 focus:border-brand-500 sm:text-sm">
+                    </div>
+                </div>
+
+                <div>
+                    <button type="submit"
+                        class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                        Create Account
+                    </button>
+                </div>
+            </form>
+
+            <!-- AI Help -->
+            <div class="mt-6">
+                <div class="relative">
+                    <div class="absolute inset-0 flex items-center">
+                        <div class="w-full border-t border-slate-300"></div>
+                    </div>
+                    <div class="relative flex justify-center text-sm">
+                        <span class="px-2 bg-white text-slate-500">Registration Help (AI)</span>
+                    </div>
+                </div>
+
+                <div class="mt-6">
+                    <div class="flex rounded-md shadow-sm">
+                        <input type="text" id="ai-help-input"
+                            class="focus:ring-brand-500 focus:border-brand-500 flex-1 block w-full rounded-none rounded-l-md sm:text-sm border-slate-300"
+                            placeholder="e.g. Is my password strong enough?">
+                        <button type="button" onclick="askAI()"
+                            class="-ml-px relative inline-flex items-center space-x-2 px-4 py-2 border border-slate-300 text-sm font-medium rounded-r-md text-slate-700 bg-slate-50 hover:bg-slate-100 focus:outline-none focus:ring-1 focus:ring-brand-500 focus:border-brand-500">
+                            <span>Ask</span>
+                        </button>
+                    </div>
+                    <div id="ai-response" class="mt-2 text-sm text-slate-600 italic"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    async function askAI() {
+        const query = document.getElementById('ai-help-input').value;
+        const responseDiv = document.getElementById('ai-response');
+        if (!query) return;
+
+        responseDiv.innerText = "AI is thinking...";
+
+        const res = await fetch('/api/auth-help', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ query: query })
+        });
+        const data = await res.json();
+        responseDiv.innerText = data.answer;
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+
+{% block title %}Resume Analysis{% endblock %}
+
+{% block content %}
+<div class="w-full space-y-8">
+
+    <!-- Hero Section -->
+    <div
+        class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-cyan-600 to-blue-600 p-10 text-center shadow-xl">
+        <!-- Background Decorations -->
+        <div class="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 rounded-full bg-white/10 blur-3xl"></div>
+        <div class="absolute bottom-0 left-0 -ml-16 -mb-16 w-64 h-64 rounded-full bg-blue-900/20 blur-3xl"></div>
+
+        <div class="relative z-10">
+            <div
+                class="inline-flex items-center justify-center p-3 bg-white/20 backdrop-blur-md rounded-xl mb-6 shadow-inner ring-1 ring-white/30">
+                <svg class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+            </div>
+            <h1 class="text-4xl font-black text-white tracking-tight mb-4">Career & Resume AI</h1>
+            <p class="text-cyan-50 text-lg max-w-2xl mx-auto font-medium opacity-90">
+                Stop guessing. Let our ATS-Verification Engine analyze your resume against your dream job and give you
+                actionable feedback.
+            </p>
+        </div>
+    </div>
+
+    <!-- Main Card Form -->
+    <div class="bg-white rounded-3xl shadow-sm border border-slate-200 p-8 md:p-12 relative overflow-hidden">
+
+        <form method="POST" action="{{ url_for('resume_analyze') }}" enctype="multipart/form-data"
+            class="space-y-8 relative z-10">
+            <!-- Section 1: Role Details -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label for="target_role" class="block text-sm font-bold text-slate-700 mb-2">Target Role</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <svg class="h-5 w-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                            </svg>
+                        </div>
+                        <input type="text" name="target_role" id="target_role"
+                            class="block w-full pl-12 rounded-xl border-slate-200 bg-slate-50 p-4 text-slate-900 shadow-sm focus:border-cyan-500 focus:bg-white focus:ring-cyan-500 transition-all text-lg placeholder-slate-400"
+                            placeholder="e.g. Senior Product Manager" required>
+                    </div>
+                </div>
+
+                <div>
+                    <label for="level" class="block text-sm font-bold text-slate-700 mb-2">Current Level</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <svg class="h-5 w-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                            </svg>
+                        </div>
+                        <select id="level" name="level"
+                            class="block w-full pl-12 rounded-xl border-slate-200 bg-slate-50 p-4 text-slate-900 shadow-sm focus:border-cyan-500 focus:bg-white focus:ring-cyan-500 transition-all text-lg appearance-none">
+                            <option value="Entry">Entry Level</option>
+                            <option value="Mid">Mid Level</option>
+                            <option value="Senior">Senior Level</option>
+                        </select>
+                        <div
+                            class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-slate-500">
+                            <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
+                                fill="currentColor">
+                                <path fill-rule="evenodd"
+                                    d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 2: Upload Resume -->
+            <div>
+                <label for="resume_file" class="block text-sm font-bold text-slate-700 mb-2">Upload Resume</label>
+                <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-slate-300 border-dashed rounded-2xl bg-slate-50 hover:bg-slate-100 transition-colors cursor-pointer"
+                    onclick="document.getElementById('resume_file').click()">
+                    <div class="space-y-1 text-center">
+                        <svg class="mx-auto h-12 w-12 text-slate-400" stroke="currentColor" fill="none"
+                            viewBox="0 0 48 48" aria-hidden="true">
+                            <path
+                                d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        <div class="flex text-sm text-slate-600 justify-center">
+                            <label for="resume_file"
+                                class="relative cursor-pointer bg-transparent rounded-md font-medium text-cyan-600 hover:text-cyan-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-cyan-500">
+                                <span>Upload a file</span>
+                                <input id="resume_file" name="resume_file" type="file" class="sr-only"
+                                    accept=".pdf,.doc,.docx" required
+                                    onchange="document.getElementById('file-name').innerText = this.files[0].name">
+                            </label>
+                            <p class="pl-1">or drag and drop</p>
+                        </div>
+                        <p class="text-xs text-slate-500">
+                            PDF, DOC, DOCX up to 10MB
+                        </p>
+                        <p id="file-name" class="text-sm text-cyan-700 font-bold mt-2"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="pt-6 text-center">
+                <button type="submit"
+                    class="w-full group relative flex justify-center items-center py-5 px-8 border border-transparent rounded-2xl shadow-xl text-xl font-bold text-white bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cyan-500 transition-all transform hover:-translate-y-1 hover:shadow-2xl overflow-hidden">
+                    <span class="relative z-10 flex items-center">
+                        Analyze Resume
+                        <svg class="ml-3 h-6 w-6 group-hover:translate-x-1 transition-transform" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </span>
+                    <div
+                        class="absolute inset-0 h-full w-full scale-0 rounded-2xl transition-all duration-300 group-hover:scale-100 group-hover:bg-cyan-700/20">
+                    </div>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

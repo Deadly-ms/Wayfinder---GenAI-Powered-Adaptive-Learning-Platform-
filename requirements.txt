@@ -1,0 +1,14 @@
+flask
+flask_sqlalchemy
+flask_login
+python-dotenv
+requests
+fpdf
+openai
+google-generativeai
+mistralai
+werkzeug
+python-docx
+flask-socketio
+eventlet
+pdfminer.six

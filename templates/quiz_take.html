@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block title %}Taking Quiz{% endblock %}
+
+{% block content %}
+<div class="min-h-[calc(100vh-4rem)] flex flex-col items-center justify-center p-4 lg:p-8" x-data="{ 
+        step: 1, 
+        total: {{ questions|length }}, 
+        answers: {},
+        selectOption(qid, option) {
+            this.answers[qid] = option;
+        },
+        nextStep() {
+            if (this.step < this.total) this.step++;
+        },
+        prevStep() {
+            if (this.step > 1) this.step--;
+        }
+     }">
+
+    <!-- Progress Bar -->
+    <div class="w-full max-w-2xl mb-8">
+        <div class="flex justify-between text-sm font-medium text-slate-500 mb-2">
+            <span>Question <span x-text="step"></span> of <span x-text="total"></span></span>
+            <span x-text="Math.round((step / total) * 100) + '%'"></span>
+        </div>
+        <div class="w-full bg-slate-200 rounded-full h-2.5 overflow-hidden">
+            <div class="bg-brand-600 h-2.5 rounded-full transition-all duration-500 ease-out"
+                :style="'width: ' + ((step / total) * 100) + '%'"></div>
+        </div>
+    </div>
+
+    <!-- Question Card -->
+    <form method="POST" action="{{ url_for('quiz_submit') }}" class="w-full max-w-2xl relative min-h-[600px]">
+        <input type="hidden" name="questions_data" value="{{ questions_json }}">
+        <input type="hidden" name="topic" value="{{ course_name }}">
+
+        {% for q in questions %}
+        <div x-show="step === {{ loop.index }}" x-transition:enter="transition ease-out duration-300 transform"
+            x-transition:enter-start="opacity-0 translate-x-12" x-transition:enter-end="opacity-100 translate-x-0"
+            x-transition:leave="transition ease-in duration-200 transform"
+            x-transition:leave-start="opacity-100 translate-x-0" x-transition:leave-end="opacity-0 -translate-x-12"
+            class="absolute inset-0 bg-white rounded-3xl shadow-xl border border-slate-100 p-8 md:p-10 flex flex-col">
+
+            <div class="flex-1">
+                <div class="mb-6">
+                    <span
+                        class="inline-block px-3 py-1 bg-violet-100 text-violet-700 text-xs font-bold rounded-full mb-3">
+                        Question {{ loop.index }}
+                    </span>
+                    <h2 class="text-2xl font-bold text-slate-800 leading-relaxed">{{ q.question }}</h2>
+                </div>
+
+                <div class="space-y-3">
+                    {% for option in q.options %}
+                    <label
+                        class="group relative flex items-center p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 hover:bg-violet-50"
+                        :class="answers['{{ q.id }}'] === '{{ option }}' ? 'border-brand-500 bg-brand-50' : 'border-slate-200 hover:border-brand-200'">
+                        <input type="radio" name="{{ q.id }}" value="{{ option }}"
+                            @change="selectOption('{{ q.id }}', '{{ option }}')" class="sr-only">
+
+                        <div class="flex-shrink-0 mr-4">
+                            <div class="w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors"
+                                :class="answers['{{ q.id }}'] === '{{ option }}' ? 'border-brand-500 bg-brand-500' : 'border-slate-300'">
+                                <div class="w-2.5 h-2.5 bg-white rounded-full opacity-0 transition-opacity"
+                                    :class="answers['{{ q.id }}'] === '{{ option }}' && 'opacity-100'"></div>
+                            </div>
+                        </div>
+
+                        <span class="text-lg font-medium text-slate-700 group-hover:text-slate-900 transition-colors"
+                            :class="answers['{{ q.id }}'] === '{{ option }}' && 'text-brand-900'">{{ option }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Footer Buttons -->
+            <div class="mt-8 pt-6 border-t border-slate-100 flex justify-between items-center bg-white z-10">
+                <button type="button" @click="prevStep"
+                    class="px-6 py-2.5 rounded-xl text-slate-500 font-bold hover:bg-slate-100 transition-colors disabled:opacity-0"
+                    :disabled="step === 1">
+                    Back
+                </button>
+
+                <button type="button" @click="nextStep" x-show="step < total"
+                    class="px-8 py-3 rounded-xl bg-brand-600 text-white font-bold shadow-lg shadow-brand-500/30 hover:bg-brand-700 hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:shadow-none"
+                    :disabled="!answers['{{ q.id }}']">
+                    Next
+                </button>
+
+                <button type="submit" x-show="step === total"
+                    class="px-8 py-3 rounded-xl bg-gradient-to-r from-brand-600 to-purple-600 text-white font-bold shadow-lg shadow-purple-500/30 hover:from-brand-700 hover:to-purple-700 hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    :disabled="!answers['{{ q.id }}']">
+                    Submit Quiz
+                </button>
+            </div>
+        </div>
+        {% endfor %}
+    </form>
+</div>
+{% endblock %}

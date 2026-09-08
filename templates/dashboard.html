@@ -1,0 +1,648 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="space-y-8" x-data="dashboardController()">
+
+    <!-- Hero Section with Glassmorphism -->
+    <div
+        class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-violet-600 to-indigo-600 p-8 shadow-xl text-white">
+        <div class="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 rounded-full bg-white/10 blur-3xl"></div>
+        <div class="absolute bottom-0 left-0 -ml-16 -mb-16 w-64 h-64 rounded-full bg-purple-500/20 blur-3xl"></div>
+
+        <div class="relative z-10 flex flex-col md:flex-row justify-between items-center">
+            <div>
+                <h1 class="text-4xl font-black tracking-tight mb-2">Hello, {{ current_user.username }}! 🚀</h1>
+                <p class="text-indigo-100 text-lg font-medium opacity-90">Your learning journey is on track. Let's
+                    conquer new skills today.</p>
+            </div>
+            <div class="mt-6 md:mt-0 text-right bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/20">
+                <div class="text-4xl font-black tracking-tighter" x-text="time"></div>
+                <div class="text-indigo-200 font-medium uppercase tracking-wide text-xs mt-1" x-text="date"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Overview -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <!-- Metric 1 -->
+        <div
+            class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+            <div class="flex items-center justify-between mb-4">
+                <div class="p-3 bg-blue-50 text-blue-600 rounded-xl">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253">
+                        </path>
+                    </svg>
+                </div>
+                <span class="text-xs font-bold text-green-500 bg-green-50 px-2 py-1 rounded-full">Started</span>
+            </div>
+            <h3 class="text-slate-500 text-sm font-medium">Active Courses</h3>
+            <p class="text-3xl font-bold text-slate-800 mt-1">{{ stats.active_courses }}</p>
+        </div>
+
+        <!-- Metric 2 -->
+        <div
+            class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+            <div class="flex items-center justify-between mb-4">
+                <div class="p-3 bg-purple-50 text-purple-600 rounded-xl">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+                <span class="text-xs font-bold text-purple-500 bg-purple-50 px-2 py-1 rounded-full">Passed</span>
+            </div>
+            <h3 class="text-slate-500 text-sm font-medium">Quizzes Passed</h3>
+            <p class="text-3xl font-bold text-slate-800 mt-1">{{ stats.quizzes_passed }}</p>
+        </div>
+
+        <!-- Metric 3 -->
+        <div
+            class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+            <div class="flex items-center justify-between mb-4">
+                <div class="p-3 bg-amber-50 text-amber-600 rounded-xl">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                    </svg>
+                </div>
+                <span class="text-xs font-bold text-amber-500 bg-amber-50 px-2 py-1 rounded-full">On Fire! 🔥</span>
+            </div>
+            <h3 class="text-slate-500 text-sm font-medium">Day Streak</h3>
+            <p class="text-3xl font-bold text-slate-800 mt-1">{{ stats.streak }} Days</p>
+        </div>
+
+        <!-- Metric 4 -->
+        <div
+            class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+            <div class="flex items-center justify-between mb-4">
+                <div class="p-3 bg-pink-50 text-pink-600 rounded-xl">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+                <span class="text-xs font-bold text-slate-500 bg-slate-50 px-2 py-1 rounded-full">Total</span>
+            </div>
+            <h3 class="text-slate-500 text-sm font-medium">Learning Hours</h3>
+            <p class="text-3xl font-bold text-slate-800 mt-1">{{ stats.learning_hours }}h</p>
+        </div>
+    </div>
+
+    <!-- Main Grid Content -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+        <!-- Left Column (Calendar & Chart) -->
+        <div class="lg:col-span-2 space-y-8">
+
+            <!-- Advanced Calendar Card -->
+            <div class="bg-white rounded-3xl shadow-sm border border-slate-200 p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-800">Schedule</h2>
+                        <p class="text-slate-500 text-sm">Manage your learning timeline</p>
+                    </div>
+                    <button @click="addCalendarEvent()"
+                        class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-xl transition-colors shadow-lg shadow-indigo-200">
+                        + Add Event
+                    </button>
+                </div>
+                <!-- FullCalendar Mount Point -->
+                <div id='calendar' class="min-h-[500px]"></div>
+            </div>
+
+            <!-- User Activity Chart -->
+            <div class="bg-white rounded-3xl shadow-sm border border-slate-200 p-6">
+                <h2 class="text-xl font-bold text-slate-800 mb-6">Learning Activity</h2>
+                <div class="w-full h-64">
+                    <canvas id="activityChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Recommendations Section -->
+            <div class="bg-white rounded-3xl shadow-sm border border-slate-200 p-6">
+                <h2 class="text-xl font-bold text-slate-800 mb-4">Recommended For You</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {% for topic in recommendations.next_topics %}
+                    <div
+                        class="group relative bg-slate-50 hover:bg-white border border-slate-100 hover:border-indigo-100 rounded-2xl p-4 transition-all duration-300 hover:shadow-md cursor-pointer">
+                        <div class="flex items-start justify-between">
+                            <div class="flex items-center gap-4">
+                                <div
+                                    class="h-12 w-12 rounded-xl bg-white border border-slate-100 shadow-sm flex items-center justify-center text-indigo-600 font-bold text-lg group-hover:scale-110 transition-transform">
+                                    {{ topic[0] }}
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-slate-800 group-hover:text-indigo-600 transition-colors">
+                                        {{ topic }}</h4>
+                                    <p class="text-xs text-slate-500 mt-1">Based on your interests</p>
+                                </div>
+                            </div>
+                            <div
+                                class="h-8 w-8 rounded-full bg-slate-200/50 flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 5l7 7-7 7"></path>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Right Column (Sticky Notes & Progress) -->
+        <div class="space-y-8">
+
+            <!-- Focus Timer Widget (Pomodoro) -->
+            <div class="bg-white rounded-3xl shadow-sm border border-slate-200 p-6 relative overflow-hidden" x-data="{
+                     timeLeft: 1500,
+                     totalTime: 1500,
+                     timer: null,
+                     isRunning: false,
+                     mode: 'focus', // focus | break
+                     goalTitle: '',
+                     customMinutes: 25,
+                     showSettings: false,
+                     
+                     init() {
+                        const saved = JSON.parse(localStorage.getItem('focusTimer'));
+                        if (saved) {
+                            this.mode = saved.mode;
+                            this.goalTitle = saved.goalTitle || '';
+                            this.totalTime = saved.totalTime || 1500;
+                            
+                            if (saved.targetEndTime) {
+                                const remaining = Math.floor((saved.targetEndTime - Date.now()) / 1000);
+                                if (remaining > 0) {
+                                    this.timeLeft = remaining;
+                                    this.startCountdown(saved.targetEndTime);
+                                } else {
+                                    // Timer expired while away
+                                    this.timeLeft = 0;
+                                    this.isRunning = false;
+                                    localStorage.removeItem('focusTimer');
+                                    setTimeout(() => alert(this.mode === 'focus' ? 'Session Complete: ' + this.goalTitle : 'Break Over!'), 500);
+                                }
+                            } else {
+                                this.timeLeft = saved.timeLeft || 1500;
+                            }
+                        }
+                     },
+                     
+                     get formattedTime() {
+                         const m = Math.floor(this.timeLeft / 60).toString().padStart(2, '0');
+                         const s = (this.timeLeft % 60).toString().padStart(2, '0');
+                         return `${m}:${s}`;
+                     },
+                     
+                     get progressWidth() {
+                        return ((this.totalTime - this.timeLeft) / this.totalTime) * 100 + '%';
+                     },
+                     
+                     toggleTimer() {
+                         if (this.isRunning) {
+                             this.stopTimer();
+                         } else {
+                             const target = Date.now() + (this.timeLeft * 1000);
+                             this.startCountdown(target);
+                             this.saveState(target);
+                         }
+                     },
+                     
+                     startCountdown(endTime) {
+                         this.isRunning = true;
+                         clearInterval(this.timer);
+                         this.timer = setInterval(() => {
+                             const now = Date.now();
+                             const remaining = Math.round((endTime - now) / 1000);
+                             
+                             if (remaining >= 0) {
+                                 this.timeLeft = remaining;
+                             } else {
+                                 this.completeTimer();
+                             }
+                         }, 1000);
+                     },
+                     
+                     stopTimer() {
+                         this.isRunning = false;
+                         clearInterval(this.timer);
+                         this.saveState(null); // Clear target time, keep remaining
+                     },
+                     
+                     completeTimer() {
+                         this.stopTimer();
+                         this.timeLeft = 0;
+                         localStorage.removeItem('focusTimer');
+                         alert(this.mode === 'focus' ? '🎉 Focus Goal Reached: ' + (this.goalTitle || 'Session') : '🔔 Break time is over!');
+                         this.setMode(this.mode === 'focus' ? 'break' : 'focus');
+                     },
+                     
+                     resetTimer() {
+                         this.stopTimer();
+                         this.timeLeft = this.mode === 'focus' ? (this.customMinutes * 60) : 300;
+                         this.totalTime = this.timeLeft;
+                         localStorage.removeItem('focusTimer');
+                     },
+                     
+                     applySettings() {
+                        this.timeLeft = this.customMinutes * 60;
+                        this.totalTime = this.timeLeft;
+                        this.showSettings = false;
+                        this.stopTimer();
+                     },
+                     
+                     saveState(target) {
+                         localStorage.setItem('focusTimer', JSON.stringify({
+                             mode: this.mode,
+                             targetEndTime: target,
+                             timeLeft: this.timeLeft,
+                             totalTime: this.totalTime,
+                             goalTitle: this.goalTitle
+                         }));
+                     },
+                     
+                     setMode(newMode) {
+                        this.mode = newMode;
+                        this.customMinutes = newMode === 'focus' ? 25 : 5;
+                        this.resetTimer();
+                     }
+                 }">
+
+                <!-- Decorative Blur -->
+                <div class="absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 rounded-full blur-2xl opacity-20"
+                    :class="mode === 'focus' ? 'bg-red-500' : 'bg-green-500'"></div>
+
+                <!-- Header -->
+                <div class="flex justify-between items-center mb-6 relative z-10">
+                    <h3 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                        <span>⏱️</span> Focus Timer
+                    </h3>
+                    <button @click="showSettings = !showSettings"
+                        class="text-slate-400 hover:text-indigo-600 transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Settings/Inputs Mode -->
+                <div x-show="showSettings" x-transition class="mb-4 bg-slate-50 p-4 rounded-xl border border-slate-100">
+                    <div class="space-y-3">
+                        <div>
+                            <label class="text-xs font-bold text-slate-500 uppercase">Goal Title</label>
+                            <input type="text" x-model="goalTitle" placeholder="What are you doing?"
+                                class="w-full text-sm mt-1 p-2 rounded-lg border-slate-200 focus:ring-indigo-500 focus:border-indigo-500">
+                        </div>
+                        <div>
+                            <label class="text-xs font-bold text-slate-500 uppercase">Duration (mins)</label>
+                            <div class="flex gap-2">
+                                <input type="number" x-model="customMinutes"
+                                    class="w-20 text-sm mt-1 p-2 rounded-lg border-slate-200">
+                                <button @click="applySettings()"
+                                    class="flex-1 mt-1 bg-indigo-600 text-white text-xs font-bold rounded-lg hover:bg-indigo-700">Set
+                                    Timer</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Timer Display -->
+                <div class="text-center py-4 relative z-10">
+                    <div x-show="goalTitle && !showSettings"
+                        class="text-indigo-600 font-bold text-sm mb-2 animate-pulse" x-text="goalTitle"></div>
+
+                    <div class="text-6xl font-black tracking-tighter text-slate-800 font-mono mb-6 transition-colors duration-300"
+                        :class="isRunning ? (mode==='focus'?'text-red-600':'text-green-600') : 'text-slate-800'"
+                        x-text="formattedTime">
+                        25:00
+                    </div>
+
+                    <!-- Progress Bar -->
+                    <div class="w-full h-2 bg-slate-100 rounded-full mb-6 overflow-hidden">
+                        <div class="h-full transition-all duration-1000 ease-linear"
+                            :class="mode === 'focus' ? 'bg-red-500' : 'bg-green-500'"
+                            :style="`width: ${progressWidth}`"></div>
+                    </div>
+
+                    <div class="flex justify-center gap-4">
+                        <button @click="toggleTimer()"
+                            class="h-14 w-14 rounded-2xl flex items-center justify-center text-white shadow-lg transition-transform active:scale-95"
+                            :class="isRunning ? 'bg-amber-500 hover:bg-amber-600' : (mode === 'focus' ? 'bg-slate-900 hover:bg-slate-800' : 'bg-green-600 hover:bg-green-700')">
+                            <svg x-show="!isRunning" class="w-6 h-6 ml-1" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M8 5v14l11-7z" />
+                            </svg>
+                            <svg x-show="isRunning" class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
+                            </svg>
+                        </button>
+
+                        <button @click="resetTimer()"
+                            class="h-14 w-14 rounded-2xl bg-slate-100 text-slate-500 hover:bg-slate-200 flex items-center justify-center transition-colors">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Enhanced Sticky Notes App -->
+            <div class="space-y-4">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                        <span class="p-1 bg-yellow-100 rounded-lg text-yellow-600">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
+                                </path>
+                            </svg>
+                        </span>
+                        Sticky Notes
+                    </h3>
+                    <span class="text-xs font-bold bg-slate-100 text-slate-600 px-3 py-1 rounded-full"><span
+                            x-text="notes.length"></span> Notes</span>
+                </div>
+
+                <!-- Note Creator -->
+                <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
+                    <div class="flex gap-2 mb-3">
+                        <template x-for="color in noteColors">
+                            <button @click="selectedColor = color"
+                                class="w-6 h-6 rounded-full border-2 transition-transform hover:scale-110"
+                                :class="{'border-slate-400 scale-110': selectedColor === color, 'border-transparent': selectedColor !== color}"
+                                :style="`background-color: ${color}`"></button>
+                        </template>
+                    </div>
+                    <div class="relative">
+                        <textarea x-model="newNote" @keydown.enter.prevent="addNote()"
+                            class="w-full bg-slate-50 border-0 rounded-xl p-3 text-slate-700 focus:ring-2 focus:ring-indigo-500 placeholder-slate-400 resize-none font-medium"
+                            rows="2" placeholder="Write a note... (Press Enter to save)"></textarea>
+                        <button @click="addNote()"
+                            class="absolute bottom-2 right-2 p-1.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors shadow-md disabled:opacity-50"
+                            :disabled="!newNote.trim()">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 4v16m8-8H4"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Notes Grid -->
+                <!-- We use flex-wrap or grid. Grid is better for cleaner layout -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <template x-for="note in notes" :key="note.id">
+                        <div class="relative group p-4 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 transform hover:-translate-y-1"
+                            :style="`background-color: ${parseContent(note.content).color || '#fef3c7'}`">
+
+                            <!-- Note Header -->
+                            <div class="flex justify-between items-start mb-2">
+                                <button @click="toggleNote(note)"
+                                    class="text-slate-900/40 hover:text-green-600 transition-colors"
+                                    :class="{'text-green-600': note.is_completed}" title="Mark Done">
+                                    <svg class="w-5 h-5" :fill="note.is_completed ? 'currentColor' : 'none'"
+                                        stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                </button>
+                                <button @click="deleteNote(note.id)"
+                                    class="text-slate-900/20 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
+                                    title="Delete">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                </button>
+                            </div>
+
+                            <!-- Note Content -->
+                            <p class="text-slate-800 font-medium text-sm whitespace-pre-wrap leading-relaxed decoration-2 decoration-slate-900/20"
+                                :class="{'line-through opacity-60': note.is_completed}"
+                                x-text="parseContent(note.content).text"></p>
+
+                            <!-- Date (optional) -->
+                            <!-- <div class="mt-3 pt-2 border-t border-black/5 text-[10px] text-slate-900/40 font-bold uppercase tracking-wider">
+                                Today
+                            </div> -->
+                        </div>
+                    </template>
+                </div>
+            </div>
+
+            <!-- Recent Activity Timeline -->
+            <div class="bg-white rounded-3xl shadow-sm border border-slate-200 p-6">
+                <h3 class="text-lg font-bold text-slate-800 mb-4">Recent Activity</h3>
+                <div class="relative pl-4 border-l-2 border-slate-100 space-y-6">
+                    <template x-for="item in timeline" :key="item.time_str">
+                        <div class="relative">
+                            <div class="absolute -left-[21px] top-1 h-3 w-3 rounded-full border-2 border-white shadow-sm"
+                                :class="{'bg-purple-500': item.type === 'quiz', 'bg-blue-500': item.type === 'learning'}">
+                            </div>
+                            <p class="text-xs text-slate-500 mb-1" x-text="item.time_str"></p>
+                            <p class="text-sm font-semibold text-slate-800" x-text="item.title"></p>
+                            <p class="text-xs text-slate-400" x-text="item.desc"></p>
+                        </div>
+                    </template>
+
+                    <div x-show="timeline.length === 0" class="text-sm text-slate-400 italic">
+                        No recent activity found. Start a quiz or generic path!
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('alpine:init', () => {
+        Alpine.data('dashboardController', () => ({
+            time: '',
+            date: '',
+            notes: [],
+            newNote: '',
+            calendar: null,
+
+            timeline: [], // New
+
+            init() {
+                this.updateTime();
+                setInterval(() => this.updateTime(), 1000);
+                this.fetchNotes();
+                this.initCalendar();
+                this.fetchStats(); // New
+            },
+
+            updateTime() {
+                const now = new Date();
+                this.time = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                this.date = now.toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+            },
+
+            // --- Sticky Notes Logic ---
+            noteColors: ['#fef3c7', '#dcfce7', '#dbeafe', '#fce7f3', '#f3f4f6'], // Yellow, Green, Blue, Pink, Grey
+            selectedColor: '#fef3c7',
+
+            parseContent(contentRaw) {
+                try {
+                    // Try parsing as JSON first
+                    const parsed = JSON.parse(contentRaw);
+                    if (parsed && parsed.text) return parsed;
+                } catch (e) {
+                    // Fallback for legacy plain text notes
+                }
+                return { text: contentRaw, color: '#fef3c7' };
+            },
+
+            async fetchNotes() {
+                try {
+                    const res = await fetch('/api/notes');
+                    if (res.ok) this.notes = await res.json();
+                } catch (e) { console.error(e); }
+            },
+
+            async addNote() {
+                if (!this.newNote.trim()) return;
+
+                // Pack content with color as JSON
+                const contentPayload = JSON.stringify({
+                    text: this.newNote,
+                    color: this.selectedColor
+                });
+
+                try {
+                    const res = await fetch('/api/notes', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ content: contentPayload })
+                    });
+                    if (res.ok) {
+                        this.newNote = '';
+                        this.fetchNotes();
+                    }
+                } catch (e) { console.error(e); }
+            },
+            async toggleNote(note) {
+                try {
+                    await fetch(`/api/notes/${note.id}`, { method: 'PUT' });
+                    note.is_completed = !note.is_completed;
+                } catch (e) { console.error(e); }
+            },
+            async deleteNote(id) {
+                try {
+                    await fetch(`/api/notes/${id}`, { method: 'DELETE' });
+                    this.notes = this.notes.filter(n => n.id !== id);
+                } catch (e) { console.error(e); }
+            },
+
+            // --- FullCalendar Integration ---
+            initCalendar() {
+                const calendarEl = document.getElementById('calendar');
+                this.calendar = new FullCalendar.Calendar(calendarEl, {
+                    initialView: 'dayGridMonth',
+                    headerToolbar: {
+                        left: 'prev,next today',
+                        center: 'title',
+                        right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                    },
+                    height: 'auto',
+                    events: '/api/events', // Auto-fetch string from this endpoint
+                    editable: true,
+                    selectable: true,
+                    select: (info) => {
+                        this.addCalendarEvent(info.startStr);
+                    },
+                    eventClick: (info) => {
+                        if (confirm(`Delete '${info.event.title}'?`)) {
+                            this.deleteCalendarEvent(info.event.id);
+                        }
+                    }
+                });
+                this.calendar.render();
+            },
+
+            async addCalendarEvent(dateStr = null) {
+                const title = prompt('Enter Event Title:');
+                if (!title) return;
+
+                if (!dateStr) {
+                    dateStr = prompt('Enter Date (YYYY-MM-DD):');
+                    if (!dateStr) return;
+                }
+
+                try {
+                    const res = await fetch('/api/events', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ title: title, date: dateStr })
+                    });
+                    if (res.ok) {
+                        this.calendar.refetchEvents(); // Refresh calendar
+                    }
+                } catch (e) { console.error(e); }
+            },
+
+            async deleteCalendarEvent(id) {
+                try {
+                    await fetch(`/api/events/${id}`, { method: 'DELETE' });
+                    this.calendar.getEventById(id).remove();
+                } catch (e) { console.error(e); }
+            },
+
+            // --- Stats & Chart Logic ---
+            async fetchStats() {
+                try {
+                    const res = await fetch('/api/stats');
+                    if (res.ok) {
+                        const data = await res.json();
+                        this.timeline = data.timeline;
+                        this.initChart(data.chart.labels, data.chart.data);
+                    }
+                } catch (e) { console.error(e); }
+            },
+
+            initChart(labels, dataPoints) {
+                const ctx = document.getElementById('activityChart').getContext('2d');
+                // Destroy existing if re-init
+                if (window.myActivityChart) window.myActivityChart.destroy();
+
+                window.myActivityChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels || ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                        datasets: [{
+                            label: 'Activities',
+                            data: dataPoints || [0, 0, 0, 0, 0, 0, 0],
+                            borderColor: '#6366f1',
+                            backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                            fill: true,
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: { beginAtZero: true, grid: { display: true, drawBorder: false }, ticks: { precision: 0 } },
+                            x: { grid: { display: false } }
+                        }
+                    }
+                });
+            }
+        }))
+    });
+</script>
+{% endblock %}

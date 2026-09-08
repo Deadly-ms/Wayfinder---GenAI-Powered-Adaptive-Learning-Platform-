@@ -1,0 +1,291 @@
+{% extends "base.html" %}
+
+{% block title %}Analysis Result{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <h2 class="text-3xl font-bold text-slate-900 mb-8 w-full text-center">Resume Analysis Report</h2>
+
+    <!-- ATS Score -->
+    <div class="bg-white overflow-hidden shadow rounded-lg mb-8 border border-slate-200">
+        <div class="px-4 py-5 sm:p-6 text-center">
+            <dt class="text-sm font-medium text-slate-500 truncate uppercase tracking-wider">ATS Compatibility Score
+            </dt>
+            <dd class="mt-1 text-5xl font-extrabold text-brand-600">{{ result.ats.score }}<span
+                    class="text-2xl text-slate-400 font-medium">/100</span></dd>
+
+            <!-- Structured Analysis (Strengths & Weaknesses) -->
+            <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6 text-left max-w-5xl mx-auto">
+                <!-- Strengths -->
+                <div class="bg-green-50/50 rounded-xl p-6 border border-green-100 shadow-sm">
+                    <h4 class="font-bold text-green-800 mb-4 flex items-center text-lg">
+                        <svg class="w-6 h-6 mr-3 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        Key Strengths
+                    </h4>
+                    <ul class="space-y-3">
+                        {% for item in result.ats.strengths %}
+                        <li class="flex items-start">
+                            <span class="mr-2 text-green-500 mt-1">✓</span>
+                            <span class="text-slate-700 leading-relaxed">{{ item }}</span>
+                        </li>
+                        {% else %}
+                        <li class="text-slate-500 italic">No specific strengths listed.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+
+                <!-- Weaknesses -->
+                <div class="bg-red-50/50 rounded-xl p-6 border border-red-100 shadow-sm">
+                    <h4 class="font-bold text-red-800 mb-4 flex items-center text-lg">
+                        <svg class="w-6 h-6 mr-3 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
+                            </path>
+                        </svg>
+                        Areas for Improvement
+                    </h4>
+                    <ul class="space-y-3">
+                        {% for item in result.ats.weaknesses %}
+                        <li class="flex items-start">
+                            <span class="mr-2 text-red-500 mt-1">!</span>
+                            <span class="text-slate-700 leading-relaxed">{{ item }}</span>
+                        </li>
+                        {% else %}
+                        <li class="text-slate-500 italic">No specific weaknesses listed.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+        <!-- Left Column: Gaps & Suggestions -->
+        <div class="bg-white overflow-hidden shadow rounded-lg border border-red-100 flex flex-col h-full">
+            <div class="px-4 py-5 sm:px-6 bg-red-50 border-b border-red-100">
+                <h3 class="text-lg leading-6 font-medium text-red-800">Gaps & Improvements</h3>
+            </div>
+            <div class="px-4 py-5 sm:p-6 flex-1">
+                <h4 class="font-medium text-slate-900 mb-2">Missing Skills:</h4>
+                <ul class="list-disc pl-5 mb-6 text-slate-600 space-y-1">
+                    {% for skill in result.ats.missing_skills %}
+                    <li>{{ skill }}</li>
+                    {% endfor %}
+                </ul>
+
+                <h4 class="font-medium text-slate-900 mb-2">Improvement Suggestions:</h4>
+                <ul class="list-disc pl-5 text-slate-600 space-y-1">
+                    {% for sugg in result.ats.suggestions %}
+                    <li>
+                        {% if sugg is mapping %}
+                        {# If AI returned an object, try to find a likely key #}
+                        {{ sugg.get('action') or sugg.get('suggestion') or sugg.get('text') or sugg.values()|first }}
+                        {% else %}
+                        {{ sugg }}
+                        {% endif %}
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+
+        <!-- Right Column: Career Advice -->
+        <div class="bg-white overflow-hidden shadow rounded-lg border border-green-100 flex flex-col h-full">
+            <div class="px-4 py-5 sm:px-6 bg-green-50 border-b border-green-100">
+                <h3 class="text-lg leading-6 font-medium text-green-800">Career Learning Advice</h3>
+            </div>
+            <div class="px-4 py-5 sm:p-6 flex-1">
+                <h4 class="font-medium text-slate-900 mb-2">Recommended Learning Topics:</h4>
+                <div class="flex flex-wrap gap-2 mb-6">
+                    {% for topic in result.learning.learning_topics %}
+                    <span
+                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                        {{ topic }}
+                    </span>
+                    {% endfor %}
+                </div>
+
+                <h4 class="font-medium text-slate-900 mb-2">Recommended Path:</h4>
+                <p class="text-slate-600 mb-6 text-sm italic border-l-4 border-green-300 pl-3">"{{
+                    result.learning.career_path }}"</p>
+
+                <h4 class="font-medium text-slate-900 mb-2">Certifications to Target:</h4>
+                <ul class="list-disc pl-5 text-slate-600 space-y-1">
+                    {% for cert in result.ats.certifications %}
+                    <li>
+                        {% if cert is mapping %}
+                        {{ cert.get('name') or cert.get('certification') or cert.values()|first }}
+                        {% else %}
+                        {{ cert }}
+                        {% endif %}
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Career Tools Section -->
+<div class="mt-12">
+    <h2 class="text-3xl font-bold text-slate-900 mb-8 border-b pb-4">Smart Career Tools</h2>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8" x-data="{ 
+            suggestions: [],
+            isAnalyzingRewrite: false,
+            loadRewriteSuggestions() {
+                if(this.suggestions.length > 0) return;
+                this.isAnalyzingRewrite = true;
+                fetch('/resume/full_rewrite', { method: 'POST' })
+                .then(res => res.json())
+                .then(data => {
+                    this.suggestions = data.suggestions;
+                    this.isAnalyzingRewrite = false;
+                });
+            },
+            
+            jdInput: '',
+            coverLetter: '',
+            isGeneratingLetter: false,
+            generateLetter() {
+                if(!this.jdInput) return;
+                this.isGeneratingLetter = true;
+                this.coverLetter = '';
+                fetch('/resume/cover_letter', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ jd: this.jdInput })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if(data.error) alert(data.error);
+                    else this.coverLetter = data.letter;
+                    this.isGeneratingLetter = false;
+                });
+            }
+        }" x-init="loadRewriteSuggestions()">
+
+        <!-- Tool 1: AI Resume Rewriter (Auto) -->
+        <div class="bg-white rounded-2xl shadow-lg border border-indigo-100 p-8">
+            <div class="flex items-center mb-6">
+                <div class="p-3 bg-indigo-100 rounded-xl mr-4">
+                    <svg class="w-6 h-6 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold text-slate-900">AI Resume Rewriter</h3>
+                    <p class="text-slate-500 text-sm">Harvard-style upgrades for your weak sections</p>
+                </div>
+            </div>
+
+            <!-- Loading State -->
+            <div x-show="isAnalyzingRewrite" class="text-center py-12">
+                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+                <p class="text-indigo-600 font-medium">Analyzing your resume for weak spots...</p>
+            </div>
+
+            <!-- Suggestions List -->
+            <div x-show="!isAnalyzingRewrite && suggestions.length === 0" class="text-center py-8 text-slate-500">
+                <p>No major improvements suggested! Your resume looks strong.</p>
+            </div>
+
+            <div x-show="!isAnalyzingRewrite && suggestions.length > 0"
+                class="space-y-6 max-h-[500px] overflow-y-auto pr-2">
+                <template x-for="(item, idx) in suggestions" :key="idx">
+                    <div class="bg-indigo-50/50 rounded-xl p-5 border border-indigo-100">
+                        <!-- Header -->
+                        <div class="flex justify-between items-start mb-3">
+                            <span class="bg-indigo-100 text-indigo-800 text-xs font-bold px-2 py-1 rounded-md uppercase"
+                                x-text="item.section"></span>
+                            <span class="text-xs text-red-500 font-semibold" x-text="item.issue"></span>
+                        </div>
+
+                        <!-- Original -->
+                        <div class="mb-4 opacity-70">
+                            <p class="text-xs font-bold text-slate-400 uppercase mb-1">Original:</p>
+                            <p class="text-sm text-slate-600 italic border-l-2 border-slate-300 pl-3"
+                                x-text="'&quot;' + item.original + '&quot;'"></p>
+                        </div>
+
+                        <!-- Variations -->
+                        <div>
+                            <p class="text-xs font-bold text-green-600 uppercase mb-2">Harvard-Style Improvements:</p>
+                            <div class="space-y-2">
+                                <template x-for="variation in item.variations">
+                                    <div class="p-3 bg-white rounded-lg border border-indigo-100 shadow-sm hover:shadow-md transition-all cursor-pointer group relative"
+                                        @click="navigator.clipboard.writeText(variation); alert('Copied!')">
+                                        <p class="text-sm text-slate-800" x-text="variation"></p>
+                                        <span
+                                            class="absolute top-1 right-1 text-[10px] text-indigo-500 font-bold opacity-0 group-hover:opacity-100">COPY</span>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </div>
+
+        <!-- Tool 2: Cover Letter Gen -->
+        <div class="bg-white rounded-2xl shadow-lg border border-purple-100 p-8">
+            <div class="flex items-center mb-6">
+                <div class="p-3 bg-purple-100 rounded-xl mr-4">
+                    <svg class="w-6 h-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold text-slate-900">Cover Letter Architect</h3>
+                    <p class="text-slate-500 text-sm">Tailor your story to a specific Job Description</p>
+                </div>
+            </div>
+
+            <div class="space-y-4">
+                <textarea x-model="jdInput"
+                    class="w-full rounded-xl border-slate-200 bg-slate-50 p-4 text-sm focus:ring-purple-500 focus:border-purple-500"
+                    rows="3" placeholder="Paste the Job Description (JD) here..."></textarea>
+
+                <button @click="generateLetter()" :disabled="isGeneratingLetter"
+                    class="w-full py-3 bg-purple-600 text-white font-bold rounded-xl hover:bg-purple-700 transition-all disabled:opacity-50 flex justify-center items-center">
+                    <span x-show="!isGeneratingLetter">📝 Generate Letter</span>
+                    <span x-show="isGeneratingLetter" class="animate-pulse">Writing...</span>
+                </button>
+
+                <!-- Result -->
+                <div x-show="coverLetter" class="mt-6">
+                    <h4 class="font-bold text-slate-700 text-sm uppercase mb-2">Draft:</h4>
+                    <div class="p-6 bg-slate-50 rounded-xl border border-slate-200 text-slate-700 text-sm whitespace-pre-line font-serif leading-relaxed h-64 overflow-y-auto mb-4"
+                        x-text="coverLetter"></div>
+
+                    <div class="flex space-x-4">
+                        <button @click="navigator.clipboard.writeText(coverLetter); alert('Copied!')"
+                            class="flex-1 py-2 rounded-lg border border-purple-200 text-purple-700 font-bold hover:bg-purple-50 transition-colors">
+                            Copy Text
+                        </button>
+
+                        <form action="{{ url_for('download_cover_letter') }}" method="POST" class="flex-1">
+                            <input type="hidden" name="letter_text" :value="coverLetter">
+                            <button type="submit"
+                                class="w-full py-2 rounded-lg bg-green-600 text-white font-bold hover:bg-green-700 transition-colors flex items-center justify-center">
+                                <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                </svg>
+                                Download .DOCX
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+</div>
+{% endblock %}

@@ -1,0 +1,437 @@
+{% extends "base.html" %}
+
+{% block title %}Your Learning Path{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8" x-data="learningPathController()">
+
+
+    <!-- Header Info -->
+    <div class="mb-12 text-center">
+        <h1 class="text-5xl font-black text-slate-900 mb-4 tracking-tight">
+            <span class="bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-violet-600 leading-tight">
+                {{ course_name }}
+            </span>
+        </h1>
+        <div class="flex justify-center flex-wrap items-center gap-3 mb-6">
+            <span
+                class="px-4 py-1.5 rounded-full text-xs font-bold uppercase bg-slate-100 text-slate-600 tracking-wide">
+                {{ level }}
+            </span>
+            <span class="w-1.5 h-1.5 rounded-full bg-slate-300"></span>
+            <span
+                class="px-4 py-1.5 rounded-full text-xs font-bold uppercase bg-slate-100 text-slate-600 tracking-wide">
+                {{ duration }}
+            </span>
+        </div>
+
+        <button @click="sharePath()"
+            class="inline-flex items-center px-4 py-2 bg-white border border-slate-200 shadow-sm rounded-lg text-sm font-bold text-slate-600 hover:text-indigo-600 hover:border-indigo-200 transition-all">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+            </svg>
+            Share Roadmap
+        </button>
+    </div>
+
+    <div class="space-y-16">
+
+        <!-- Overview -->
+        <div
+            class="bg-white rounded-3xl p-8 lg:p-10 border border-slate-100 shadow-lg shadow-slate-200/50 relative overflow-hidden">
+            <div
+                class="absolute top-0 right-0 w-96 h-96 bg-indigo-50 rounded-full mix-blend-multiply filter blur-3xl opacity-50 -mr-20 -mt-20">
+            </div>
+            <div
+                class="absolute bottom-0 left-0 w-72 h-72 bg-violet-50 rounded-full mix-blend-multiply filter blur-3xl opacity-50 -ml-20 -mb-20">
+            </div>
+
+            <h2 class="text-2xl font-bold text-slate-800 mb-4 relative z-10 flex items-center gap-2">
+                <span class="text-2xl">🎯</span> Goal & Overview
+            </h2>
+            <p class="text-slate-600 text-lg leading-relaxed relative z-10 font-medium">{{ roadmap.get('overview',
+                roadmap) }}</p>
+        </div>
+
+        {% if roadmap.get('weekly_schedule') %}
+
+        {# Check for Error State #}
+        {% if roadmap['weekly_schedule'][0].get('topic') == 'Raw Output' %}
+
+        <!-- Recovered Schedule Section -->
+        <div x-show="recoveredSchedule" class="relative">
+            <div class="bg-indigo-50 border border-indigo-200 rounded-xl p-4 mb-8 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <span class="text-2xl">✨</span>
+                    <div>
+                        <h3 class="font-bold text-indigo-900">Content Recovered!</h3>
+                        <p class="text-sm text-indigo-700">We successfully repaired the malformed AI response.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="absolute left-8 top-0 bottom-0 w-0.5 bg-slate-200"></div>
+
+            <div class="space-y-12">
+                <template x-for="(week, index) in recoveredSchedule" :key="index">
+                    <!-- Week Item -->
+                    <div class="relative pl-24 group" :id="'week-' + (index + 1)">
+
+                        <!-- Number Bubble -->
+                        <div class="absolute left-3 top-0 w-10 h-10 rounded-full bg-white border-4 border-slate-100 text-slate-500 font-bold flex items-center justify-center z-10 group-hover:border-indigo-100 group-hover:bg-indigo-600 group-hover:text-white transition-all duration-300 shadow-sm"
+                            x-text="index + 1">
+                        </div>
+
+                        <!-- Content Card -->
+                        <div
+                            class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm hover:shadow-xl hover:border-indigo-100 transition-all duration-300 transform group-hover:-translate-y-1">
+
+                            <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-6">
+                                <div>
+                                    <h3 class="text-xl font-bold text-slate-900">
+                                        <span x-text="week.week"></span>: <span x-text="week.topic"></span>
+                                    </h3>
+                                    <p class="text-slate-500 mt-2 leading-relaxed" x-text="week.details"></p>
+                                </div>
+                                <!-- AI Tutor Button -->
+                                <button @click="askTutor(week.topic)"
+                                    class="shrink-0 inline-flex items-center px-4 py-2 bg-indigo-50 text-indigo-700 text-xs font-bold uppercase rounded-lg hover:bg-indigo-600 hover:text-white transition-all">
+                                    <span class="mr-2 text-base">🤖</span> Ask Tutor
+                                </button>
+                            </div>
+
+                            <!-- Tasks -->
+                            <template x-if="week.daily_breakdown && week.daily_breakdown.length > 0">
+                                <div class="bg-slate-50 rounded-xl p-5 border border-slate-100">
+                                    <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Action
+                                        Items
+                                    </h4>
+                                    <ul class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                        <template x-for="(day, dayIndex) in week.daily_breakdown" :key="dayIndex">
+                                            <li class="flex items-start gap-3 p-2 rounded-lg hover:bg-white hover:shadow-sm transition-all cursor-pointer select-none group/item"
+                                                @click="toggleItem(week.week + '-' + (index + 1))">
+                                                <div class="mt-0.5 w-5 h-5 rounded border-2 flex items-center justify-center transition-all duration-200 shrink-0"
+                                                    :class="isCompleted(week.week + '-' + (index + 1)) ? 'bg-indigo-500 border-indigo-500' : 'border-slate-300 bg-white group-hover/item:border-indigo-400'">
+                                                    <svg x-show="isCompleted(week.week + '-' + (index + 1))"
+                                                        class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor"
+                                                        viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            stroke-width="3" d="M5 13l4 4L19 7" />
+                                                    </svg>
+                                                </div>
+                                                <span class="text-sm font-medium transition-colors"
+                                                    :class="isCompleted(week.week + '-' + (index + 1)) ? 'text-slate-400 line-through' : 'text-slate-700'"
+                                                    x-text="day">
+                                                </span>
+                                            </li>
+                                        </template>
+                                    </ul>
+                                </div>
+                            </template>
+
+                            <!-- Tags -->
+                            <template x-if="week.key_outcomes && week.key_outcomes.length > 0">
+                                <div class="flex flex-wrap gap-2 mt-4">
+                                    <template x-for="outcome in week.key_outcomes">
+                                        <span
+                                            class="inline-flex items-center px-2.5 py-1 rounded-md text-[10px] font-bold uppercase bg-white border border-slate-200 text-slate-500"
+                                            x-text="outcome">
+                                        </span>
+                                    </template>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </div>
+
+        <!-- Raw Error Block (Hidden if recovered) -->
+        <div x-show="!recoveredSchedule"
+            class="bg-amber-50 border-l-4 border-amber-500 p-6 rounded-r-xl shadow-sm mb-8">
+            <div class="flex items-start">
+                <div class="shrink-0">
+                    <svg class="h-6 w-6 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                </div>
+                <div class="ml-4 w-full">
+                    <h3 class="text-lg font-bold text-amber-800">Partially Generated Content</h3>
+                    <p class="text-amber-700 mt-1">
+                        The AI generated a response, but it wasn't strictly formatted as we expected.
+                        We've preserved the raw content below for you.
+                    </p>
+
+                    <div class="mt-6 bg-white border border-amber-200 rounded-xl p-6 shadow-inner overflow-x-auto">
+                        <pre id="rawContentBlock"
+                            class="whitespace-pre-wrap text-sm font-mono text-slate-700 leading-relaxed">{{ roadmap['weekly_schedule'][0].details }}</pre>
+                    </div>
+
+                    <div class="mt-6">
+                        <a href="{{ url_for('learning_path_form') }}"
+                            class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-bold rounded-lg shadow-sm text-white bg-amber-600 hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500">
+                            Try Generating Again
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% else %}
+
+        <!-- Clean Vertical Schedule -->
+        <div class="relative">
+            <div class="absolute left-8 top-0 bottom-0 w-0.5 bg-slate-200"></div>
+
+            <div class="space-y-12">
+                {% for week in roadmap['weekly_schedule'] %}
+                <!-- Week Item -->
+                <div class="relative pl-24 group scroll-mt-32" id="week-{{ loop.index }}">
+
+                    <!-- Number Bubble -->
+                    <div
+                        class="absolute left-3 top-0 w-10 h-10 rounded-full bg-white border-4 border-slate-100 text-slate-500 font-bold flex items-center justify-center z-10 group-hover:border-indigo-100 group-hover:bg-indigo-600 group-hover:text-white transition-all duration-300 shadow-sm">
+                        {{ loop.index }}
+                    </div>
+
+                    <!-- Content Card -->
+                    <div
+                        class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm hover:shadow-xl hover:border-indigo-100 transition-all duration-300 transform group-hover:-translate-y-1">
+
+                        <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-6">
+                            <div>
+                                <h3 class="text-xl font-bold text-slate-900">{{ week.week }}: {{ week.topic }}</h3>
+                                <p class="text-slate-500 mt-2 leading-relaxed">{{ week.details }}</p>
+                            </div>
+                            <!-- AI Tutor Button -->
+                            <button @click="askTutor('{{ week.topic }}')"
+                                class="shrink-0 inline-flex items-center px-4 py-2 bg-indigo-50 text-indigo-700 text-xs font-bold uppercase rounded-lg hover:bg-indigo-600 hover:text-white transition-all">
+                                <span class="mr-2 text-base">🤖</span> Ask Tutor
+                            </button>
+                        </div>
+
+                        <!-- Tasks -->
+                        {% if week.get('daily_breakdown') %}
+                        <div class="bg-slate-50 rounded-xl p-5 border border-slate-100">
+                            <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Action Items
+                            </h4>
+                            <ul class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                {% for day in week.daily_breakdown %}
+                                <li class="flex items-start gap-3 p-2 rounded-lg hover:bg-white hover:shadow-sm transition-all cursor-pointer select-none group/item"
+                                    @click="toggleItem('{{ week.week }}-{{ loop.index }}')">
+                                    <div class="mt-0.5 w-5 h-5 rounded border-2 flex items-center justify-center transition-all duration-200 shrink-0"
+                                        :class="isCompleted('{{ week.week }}-{{ loop.index }}') ? 'bg-indigo-500 border-indigo-500' : 'border-slate-300 bg-white group-hover/item:border-indigo-400'">
+                                        <svg x-show="isCompleted('{{ week.week }}-{{ loop.index }}')"
+                                            class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
+                                                d="M5 13l4 4L19 7" />
+                                        </svg>
+                                    </div>
+                                    <span class="text-sm font-medium transition-colors"
+                                        :class="isCompleted('{{ week.week }}-{{ loop.index }}') ? 'text-slate-400 line-through' : 'text-slate-700'">
+                                        {{ day }}
+                                    </span>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        {% endif %}
+
+                        <!-- Tags -->
+                        {% if week.get('key_outcomes') %}
+                        <div class="flex flex-wrap gap-2 mt-4">
+                            {% for outcome in week.key_outcomes %}
+                            <span
+                                class="inline-flex items-center px-2.5 py-1 rounded-md text-[10px] font-bold uppercase bg-white border border-slate-200 text-slate-500">
+                                {{ outcome }}
+                            </span>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %} {# End Error Check #}
+        {% endif %}
+
+        {% if roadmap.get('resources') %}
+        <!-- Recommended Resources & Action -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div class="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm">
+                <h2 class="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-2">
+                    <svg class="w-6 h-6 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10">
+                        </path>
+                    </svg>
+                    Learning Materials
+                </h2>
+                <div class="space-y-4">
+                    {% for res in roadmap['resources'] %}
+                    <a href="{{ res.link }}" target="_blank"
+                        class="block group p-4 rounded-xl border border-slate-100 hover:border-indigo-200 hover:bg-indigo-50/30 transition-all duration-200">
+                        <div class="flex items-start gap-4">
+                            <div class="w-10 h-10 rounded-lg flex items-center justify-center shrink-0 font-bold text-lg
+                                {% if 'Video' in res.type or 'Youtube' in res.type %}bg-red-100 text-red-600
+                                {% elif 'Book' in res.type %}bg-amber-100 text-amber-600
+                                {% else %}bg-blue-100 text-blue-600{% endif %}">
+                                {{ res.type[0] }}
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <h4
+                                    class="font-bold text-slate-800 truncate group-hover:text-indigo-700 transition-colors">
+                                    {{ res.name }}</h4>
+                                <p class="text-xs text-slate-500 mt-1 truncate group-hover:text-indigo-500">{{ res.link
+                                    }}</p>
+                            </div>
+                            <svg class="w-5 h-5 text-slate-300 group-hover:text-indigo-500 group-hover:translate-x-1 transition-all"
+                                fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                            </svg>
+                        </div>
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Call to Action / Assessment -->
+            <div class="space-y-6">
+                <!-- Assessment Card -->
+                <div
+                    class="bg-gradient-to-br from-indigo-600 to-violet-700 rounded-3xl p-8 shadow-xl text-white relative overflow-hidden">
+                    <div class="absolute top-0 right-0 -mr-16 -mt-16 w-48 h-48 bg-white/10 rounded-full blur-2xl"></div>
+
+                    <span
+                        class="inline-block px-3 py-1 bg-white/20 rounded-full text-xs font-bold uppercase tracking-wide mb-4 backdrop-blur-sm">Next
+                        Step</span>
+                    <h2 class="text-3xl font-black mb-4">Validate Your Skills</h2>
+                    <p class="text-indigo-100 mb-8 leading-relaxed">Completed the first week? Take a customized AI
+                        assessment to verify your knowledge and earn your badge.</p>
+
+                    <button
+                        class="w-full py-4 bg-white text-indigo-700 font-bold rounded-xl hover:bg-indigo-50 transition-colors shadow-lg flex items-center justify-center gap-2">
+                        Start Assessment
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Download Card -->
+                <div class="bg-slate-50 rounded-3xl p-6 border border-slate-200">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="font-bold text-slate-700">Get your plan offline</h3>
+                        <form action="{{ url_for('download_path') }}" method="POST">
+                            <input type="hidden" name="roadmap_str" value="{{ roadmap_str }}">
+                            <input type="hidden" name="course_name" value="{{ course_name }}">
+                            <button type="submit"
+                                class="text-sm font-bold text-indigo-600 hover:text-indigo-700 hover:underline flex items-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                </svg>
+                                Download this Roadmap
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+
+<script>
+    document.addEventListener('alpine:init', () => {
+        Alpine.data('learningPathController', () => ({
+            completedItems: new Set(),
+            totalItems: 0,
+            recoveredSchedule: null,
+
+            init() {
+                // Load progress
+                const saved = localStorage.getItem('pathProgress_{{ course_name }}');
+                if (saved) {
+                    this.completedItems = new Set(JSON.parse(saved));
+                }
+
+                // Attempt Recovery if needed
+                this.checkAndRecover();
+
+                // Count total checkboxes
+                this.$nextTick(() => {
+                    this.totalItems = document.querySelectorAll('.group\\/item').length;
+                });
+            },
+
+            checkAndRecover() {
+                const rawBlock = document.getElementById('rawContentBlock');
+                if (rawBlock) {
+                    const rawText = rawBlock.textContent.trim();
+                    try {
+                        // 1. Clean Markdown wrappers
+                        let cleanJson = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
+                        // 2. Parse
+                        const data = JSON.parse(cleanJson);
+
+                        if (data && data.weekly_schedule) {
+                            console.log("Recovered Schedule:", data);
+                            this.recoveredSchedule = data.weekly_schedule;
+
+                            // Hide error box and show success message (optional, or just swap)
+                            // We will use x-if in the template to swap the view
+                        }
+                    } catch (e) {
+                        console.error("Client-side recovery failed:", e);
+                    }
+                }
+            },
+
+            toggleItem(id) {
+                if (this.completedItems.has(id)) {
+                    this.completedItems.delete(id);
+                } else {
+                    this.completedItems.add(id);
+                }
+                this.saveProgress();
+            },
+
+            isCompleted(id) {
+                return this.completedItems.has(id);
+            },
+
+            saveProgress() {
+                localStorage.setItem('pathProgress_{{ course_name }}', JSON.stringify(Array.from(this.completedItems)));
+            },
+
+            get completedCount() {
+                return this.completedItems.size;
+            },
+
+            get progressPercent() {
+                if (this.totalItems === 0) return 0;
+                return Math.round((this.completedItems.size / this.totalItems) * 100);
+            },
+
+            askTutor(topic) {
+                // Redirect to chatbot with question
+                const question = `Can you explain the topic "${topic}" from my {{ course_name }} course? I need a simple overview and examples.`;
+                localStorage.setItem('tutor_qs', question);
+                window.location.href = '/chatbot'; // Chatbot page should check this on load
+            },
+
+            sharePath() {
+                navigator.clipboard.writeText(window.location.href);
+                alert('Link copied to clipboard!');
+            }
+        }));
+    });
+</script>
+{% endblock %}
