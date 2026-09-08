@@ -653,7 +653,7 @@ def chat_message_api():
 
 
 if __name__ == '__main__':
-    host = os.getenv('HOST', '127.0.0.1')
+    host = os.getenv('HOST', '0.0.0.0')
     preferred_port = os.getenv('PORT')
     port = int(preferred_port) if preferred_port else get_available_port()
 
